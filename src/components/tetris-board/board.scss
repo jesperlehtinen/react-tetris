@@ -1,0 +1,46 @@
+
+.tetris-board {
+  display: flex;
+  justify-content: space-between;
+}
+
+.tetris-board__row {
+  display: flex;
+}
+
+.column {
+  padding: 12px;
+  border: 1px solid #1a1c19;
+}
+
+.block-0 {
+  background-color: #020202;
+}
+
+.block-1 {
+  background-color: #f21620;
+}
+
+.block-2 {
+  background-color: #10ac84;
+}
+
+.block-3 {
+  background-color: #5f27cd;
+}
+
+.block-4 {
+  background-color: #d925cf;
+}
+
+.block-5 {
+  background-color: #48dbfb;
+}
+
+.block-6 {
+  background-color: #fd4964;
+}
+
+.block-7 {
+  background-color: #72fa4e;
+}
