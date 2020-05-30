@@ -5,7 +5,7 @@ const TetrisBoard = ({ board }) => {
   const rows = [];
 
   board.forEach((row, index) => {
-    const columns = row.map((column, index) => <div className={`column block-${column}`} />);
+    const columns = row.map((column, index) => <div key={index} className={`column block-${column}`} />);
     rows.push(<div className="tetris-board__row" key={index}>{columns}</div>);
   })
 
