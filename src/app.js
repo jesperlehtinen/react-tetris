@@ -7,12 +7,14 @@ import { tiles } from './components/tetris-board/tiles';
 const rows = 20;
 const columns = 10;
 
+const randomizeTile = () => Math.floor(Math.random() * tiles.length)
+
 const initialState = {
   board: new Array(rows).fill(0).map(() => new Array(columns).fill(0)),
+  activeTile: randomizeTile(),
   activeTileX: Math.floor(columns / 2),
   activeTileY: 1,
-  activeTile: 2,
-  tileRotate: 0
+  tileRotation: 0
 }
 
 const App = () => {
@@ -53,7 +55,7 @@ const App = () => {
       activeTile,
       activeTileX,
       activeTileY,
-      tileRotate
+      tileRotation
     } = state;
 
     // Prepare variables for additions to x/y coordinates, current active tile and new rotation
@@ -79,10 +81,10 @@ const App = () => {
     }
 
     // Remove actual tile from board to test for new insert position
-    board[activeTileY + tiles[activeTile][tileRotate][0][1]][activeTileX + tiles[activeTile][tileRotate][0][0]] = 0;
-    board[activeTileY + tiles[activeTile][tileRotate][1][1]][activeTileX + tiles[activeTile][tileRotate][1][0]] = 0;
-    board[activeTileY + tiles[activeTile][tileRotate][2][1]][activeTileX + tiles[activeTile][tileRotate][2][0]] = 0;
-    board[activeTileY + tiles[activeTile][tileRotate][3][1]][activeTileX + tiles[activeTile][tileRotate][3][0]] = 0;
+    board[activeTileY + tiles[activeTile][tileRotation][0][1]][activeTileX + tiles[activeTile][tileRotation][0][0]] = 0;
+    board[activeTileY + tiles[activeTile][tileRotation][1][1]][activeTileX + tiles[activeTile][tileRotation][1][0]] = 0;
+    board[activeTileY + tiles[activeTile][tileRotation][2][1]][activeTileX + tiles[activeTile][tileRotation][2][0]] = 0;
+    board[activeTileY + tiles[activeTile][tileRotation][3][1]][activeTileX + tiles[activeTile][tileRotation][3][0]] = 0;
 
     // Test if the move can be executed on actual field
     let xAddIsValid = true;
@@ -92,10 +94,10 @@ const App = () => {
       for (let i = 0; i <= 3; i++) {
         // Test if tile can be moved without getting outside the board
         if (
-          activeTileX + xAdd + tiles[activeTile][tileRotate][i][0] >= 0
-          && activeTileX + xAdd + tiles[activeTile][tileRotate][i][0] < columns
+          activeTileX + xAdd + tiles[activeTile][tileRotation][i][0] >= 0
+          && activeTileX + xAdd + tiles[activeTile][tileRotation][i][0] < columns
         ) {
-          if (board[activeTileY + tiles[activeTile][tileRotate][i][1]][activeTileX + xAdd + tiles[activeTile][tileRotate][i][0]] !== 0) {
+          if (board[activeTileY + tiles[activeTile][tileRotation][i][1]][activeTileX + xAdd + tiles[activeTile][tileRotation][i][0]] !== 0) {
             // Prevent the move
             xAddIsValid = false;
           }
@@ -112,7 +114,7 @@ const App = () => {
     }
 
     // Try to rotate the tile
-    let newRotate = (tileRotate + rotateAdd > 3) ? 0 : tileRotate + rotateAdd
+    let newRotate = (tileRotation + rotateAdd > 3) ? 0 : tileRotation + rotateAdd
     let rotateIsValid = true
 
     // Test if tile should rotate
@@ -144,7 +146,7 @@ const App = () => {
 
     // If rotation is valid update rotate variable (rotate the tile)
     if (rotateIsValid) {
-      tileRotate = newRotate
+      tileRotation = newRotate
     }
 
     let yAddIsValid = true
@@ -153,13 +155,13 @@ const App = () => {
       for (let i = 0; i <= 3; i++) {
         // Test if tile can fall faster without getting outside the board
         if (
-          activeTileY + yAdd + tiles[activeTile][tileRotate][i][1] >= 0 &&
-          activeTileY + yAdd + tiles[activeTile][tileRotate][i][1] < rows
+          activeTileY + yAdd + tiles[activeTile][tileRotation][i][1] >= 0 &&
+          activeTileY + yAdd + tiles[activeTile][tileRotation][i][1] < rows
         ) {
           // Test if faster fall is not blocked by other tiles
           if (
-            board[activeTileY + yAdd + tiles[activeTile][tileRotate][i][1]][
-              activeTileX + tiles[activeTile][tileRotate][i][0]
+            board[activeTileY + yAdd + tiles[activeTile][tileRotation][i][1]][
+              activeTileX + tiles[activeTile][tileRotation][i][0]
             ] !== 0
           ) {
             // Prevent faster fall
@@ -177,10 +179,10 @@ const App = () => {
     }
 
     // Render the tile at new position
-    board[activeTileY + tiles[activeTile][tileRotate][0][1]][activeTileX + tiles[activeTile][tileRotate][0][0]] = activeTile;
-    board[activeTileY + tiles[activeTile][tileRotate][1][1]][activeTileX + tiles[activeTile][tileRotate][1][0]] = activeTile;
-    board[activeTileY + tiles[activeTile][tileRotate][2][1]][activeTileX + tiles[activeTile][tileRotate][2][0]] = activeTile;
-    board[activeTileY + tiles[activeTile][tileRotate][3][1]][activeTileX + tiles[activeTile][tileRotate][3][0]] = activeTile;
+    board[activeTileY + tiles[activeTile][tileRotation][0][1]][activeTileX + tiles[activeTile][tileRotation][0][0]] = activeTile;
+    board[activeTileY + tiles[activeTile][tileRotation][1][1]][activeTileX + tiles[activeTile][tileRotation][1][0]] = activeTile;
+    board[activeTileY + tiles[activeTile][tileRotation][2][1]][activeTileX + tiles[activeTile][tileRotation][2][0]] = activeTile;
+    board[activeTileY + tiles[activeTile][tileRotation][3][1]][activeTileX + tiles[activeTile][tileRotation][3][0]] = activeTile;
 
     // If moving down is not possible, remove completed rows add score
     // and find next tile and check if game is over
@@ -206,25 +208,25 @@ const App = () => {
       }
 
       // Create new tile
-      activeTile = Math.floor(Math.random() * 7 + 1)
+      activeTile = randomizeTile()
       activeTileX = columns / 2
       activeTileY = 1
-      tileRotate = 0
+      tileRotation = 0
 
       // Test if game is over - test if new tile can't be placed in board
       if (
-        board[activeTileY + tiles[activeTile][tileRotate][0][1]][activeTileX + tiles[activeTile][tileRotate][0][0]] !== 0 ||
-        board[activeTileY + tiles[activeTile][tileRotate][1][1]][activeTileX + tiles[activeTile][tileRotate][1][0]] !== 0 ||
-        board[activeTileY + tiles[activeTile][tileRotate][2][1]][activeTileX + tiles[activeTile][tileRotate][2][0]] !== 0 ||
-        board[activeTileY + tiles[activeTile][tileRotate][3][1]][activeTileX + tiles[activeTile][tileRotate][3][0]] !== 0
+        board[activeTileY + tiles[activeTile][tileRotation][0][1]][activeTileX + tiles[activeTile][tileRotation][0][0]] !== 0 ||
+        board[activeTileY + tiles[activeTile][tileRotation][1][1]][activeTileX + tiles[activeTile][tileRotation][1][0]] !== 0 ||
+        board[activeTileY + tiles[activeTile][tileRotation][2][1]][activeTileX + tiles[activeTile][tileRotation][2][0]] !== 0 ||
+        board[activeTileY + tiles[activeTile][tileRotation][3][1]][activeTileX + tiles[activeTile][tileRotation][3][0]] !== 0
       ) {
         // Stop the game
       } else {
         // Otherwise, render new tile and continue
-        board[activeTileY + tiles[activeTile][tileRotate][0][1]][activeTileX + tiles[activeTile][tileRotate][0][0]] = activeTile
-        board[activeTileY + tiles[activeTile][tileRotate][1][1]][activeTileX + tiles[activeTile][tileRotate][1][0]] = activeTile
-        board[activeTileY + tiles[activeTile][tileRotate][2][1]][activeTileX + tiles[activeTile][tileRotate][2][0]] = activeTile
-        board[activeTileY + tiles[activeTile][tileRotate][3][1]][activeTileX + tiles[activeTile][tileRotate][3][0]] = activeTile
+        board[activeTileY + tiles[activeTile][tileRotation][0][1]][activeTileX + tiles[activeTile][tileRotation][0][0]] = activeTile
+        board[activeTileY + tiles[activeTile][tileRotation][1][1]][activeTileX + tiles[activeTile][tileRotation][1][0]] = activeTile
+        board[activeTileY + tiles[activeTile][tileRotation][2][1]][activeTileX + tiles[activeTile][tileRotation][2][0]] = activeTile
+        board[activeTileY + tiles[activeTile][tileRotation][3][1]][activeTileX + tiles[activeTile][tileRotation][3][0]] = activeTile
       }
     }
 
@@ -233,7 +235,7 @@ const App = () => {
       board,
       activeTileX,
       activeTileY,
-      tileRotate,
+      tileRotation,
       activeTile
     });
   };
