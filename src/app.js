@@ -30,7 +30,6 @@ const App = () => {
   });
 
   const handleKeyPress = e => {
-    debugger;
     switch (e.keyCode) {
       case 37:
         updateBoard('left');
@@ -58,6 +57,12 @@ const App = () => {
       tileRotation
     } = state;
 
+    // Remove actual tile from board to test for new insert position
+    board[activeTileY + tiles[activeTile].rotations[tileRotation][0].y][activeTileX + tiles[activeTile].rotations[tileRotation][0].x] = 0;
+    board[activeTileY + tiles[activeTile].rotations[tileRotation][1].y][activeTileX + tiles[activeTile].rotations[tileRotation][1].x] = 0;
+    board[activeTileY + tiles[activeTile].rotations[tileRotation][2].y][activeTileX + tiles[activeTile].rotations[tileRotation][2].x] = 0;
+    board[activeTileY + tiles[activeTile].rotations[tileRotation][3].y][activeTileX + tiles[activeTile].rotations[tileRotation][3].x] = 0;
+        
     // Prepare variables for additions to x/y coordinates, current active tile and new rotation
     let xAdd = 0;
     let yAdd = 0;
@@ -80,24 +85,17 @@ const App = () => {
         break;
     }
 
-    // Remove actual tile from board to test for new insert position
-    board[activeTileY + tiles[activeTile][tileRotation][0][1]][activeTileX + tiles[activeTile][tileRotation][0][0]] = 0;
-    board[activeTileY + tiles[activeTile][tileRotation][1][1]][activeTileX + tiles[activeTile][tileRotation][1][0]] = 0;
-    board[activeTileY + tiles[activeTile][tileRotation][2][1]][activeTileX + tiles[activeTile][tileRotation][2][0]] = 0;
-    board[activeTileY + tiles[activeTile][tileRotation][3][1]][activeTileX + tiles[activeTile][tileRotation][3][0]] = 0;
-
-    // Test if the move can be executed on actual field
-    let xAddIsValid = true;
-
     // Test if tile should move horizontally
     if (xAdd !== 0) {
+      let xAddIsValid = true;
+
       for (let i = 0; i <= 3; i++) {
         // Test if tile can be moved without getting outside the board
         if (
-          activeTileX + xAdd + tiles[activeTile][tileRotation][i][0] >= 0
-          && activeTileX + xAdd + tiles[activeTile][tileRotation][i][0] < columns
+          activeTileX + xAdd + tiles[activeTile].rotations[tileRotation][i].x >= 0
+          && activeTileX + xAdd + tiles[activeTile].rotations[tileRotation][i].x < columns
         ) {
-          if (board[activeTileY + tiles[activeTile][tileRotation][i][1]][activeTileX + xAdd + tiles[activeTile][tileRotation][i][0]] !== 0) {
+          if (board[activeTileY + tiles[activeTile].rotations[tileRotation][i].y][activeTileX + xAdd + tiles[activeTile].rotations[tileRotation][i].x] !== 0) {
             // Prevent the move
             xAddIsValid = false;
           }
@@ -106,33 +104,29 @@ const App = () => {
           xAddIsValid = false;
         }
       }
+      // If horizontal move is valid update x variable (move the tile)
+      if (xAddIsValid && xAdd !== 0) {
+        activeTileX += xAdd;
+      }
     }
 
-    // If horizontal move is valid update x variable (move the tile)
-    if (xAddIsValid) {
-      activeTileX += xAdd;
-    }
-
-    // Try to rotate the tile
-    let newRotate = (tileRotation + rotateAdd > 3) ? 0 : tileRotation + rotateAdd
-    let rotateIsValid = true
 
     // Test if tile should rotate
     if (rotateAdd !== 0) {
-      debugger;
+      let rotateIsValid = true
+      let newRotate = (tileRotation + rotateAdd >= tiles[activeTile].rotations.length) ? 0 : tileRotation + rotateAdd;
+
       for (let i = 0; i <= 3; i++) {
         // Test if tile can be rotated without getting outside the board
         if (
-          activeTileX + tiles[activeTile][newRotate][i][0] >= 0 &&
-          activeTileX + tiles[activeTile][newRotate][i][0] < columns &&
-          activeTileY + tiles[activeTile][newRotate][i][1] >= 0 &&
-          activeTileY + tiles[activeTile][newRotate][i][1] < rows
+          activeTileX + tiles[activeTile].rotations[newRotate][i].x >= 0 &&
+          activeTileX + tiles[activeTile].rotations[newRotate][i].x < columns &&
+          activeTileY + tiles[activeTile].rotations[newRotate][i].y >= 0 &&
+          activeTileY + tiles[activeTile].rotations[newRotate][i].y < rows
         ) {
           // Test of tile rotation is not blocked by other tiles
           if (
-            board[activeTileY + tiles[activeTile][newRotate][i][1]][
-              activeTileX + tiles[activeTile][newRotate][i][0]
-            ] !== 0
+            board[activeTileY + tiles[activeTile].rotations[newRotate][i].y][activeTileX + tiles[activeTile].rotations[newRotate][i].x] !== 0
           ) {
             // Prevent rotation
             rotateIsValid = false
@@ -142,27 +136,24 @@ const App = () => {
           rotateIsValid = false
         }
       }
+      // If rotation is valid update rotate variable (rotate the tile)
+      if (rotateIsValid) {
+        tileRotation = newRotate
+      }
     }
 
-    // If rotation is valid update rotate variable (rotate the tile)
-    if (rotateIsValid) {
-      tileRotation = newRotate
-    }
-
-    let yAddIsValid = true
+    let yAddIsValid = true;
 
     if (yAdd !== 0) {
       for (let i = 0; i <= 3; i++) {
         // Test if tile can fall faster without getting outside the board
         if (
-          activeTileY + yAdd + tiles[activeTile][tileRotation][i][1] >= 0 &&
-          activeTileY + yAdd + tiles[activeTile][tileRotation][i][1] < rows
+          activeTileY + yAdd + tiles[activeTile].rotations[tileRotation][i].y >= 0 &&
+          activeTileY + yAdd + tiles[activeTile].rotations[tileRotation][i].y < rows
         ) {
           // Test if faster fall is not blocked by other tiles
           if (
-            board[activeTileY + yAdd + tiles[activeTile][tileRotation][i][1]][
-              activeTileX + tiles[activeTile][tileRotation][i][0]
-            ] !== 0
+            board[activeTileY + yAdd + tiles[activeTile].rotations[tileRotation][i].y][activeTileX + tiles[activeTile].rotations[tileRotation][i].x] !== 0
           ) {
             // Prevent faster fall
             yAddIsValid = false;
@@ -172,22 +163,20 @@ const App = () => {
           yAddIsValid = false;
         }
       }
-    }
-
-    if (yAddIsValid) {
-      activeTileY += yAdd;
+      if (yAddIsValid) {
+        activeTileY += yAdd;
+      }
     }
 
     // Render the tile at new position
-    board[activeTileY + tiles[activeTile][tileRotation][0][1]][activeTileX + tiles[activeTile][tileRotation][0][0]] = activeTile;
-    board[activeTileY + tiles[activeTile][tileRotation][1][1]][activeTileX + tiles[activeTile][tileRotation][1][0]] = activeTile;
-    board[activeTileY + tiles[activeTile][tileRotation][2][1]][activeTileX + tiles[activeTile][tileRotation][2][0]] = activeTile;
-    board[activeTileY + tiles[activeTile][tileRotation][3][1]][activeTileX + tiles[activeTile][tileRotation][3][0]] = activeTile;
+    board[activeTileY + tiles[activeTile].rotations[tileRotation][0].y][activeTileX + tiles[activeTile].rotations[tileRotation][0].x] = activeTile;
+    board[activeTileY + tiles[activeTile].rotations[tileRotation][1].y][activeTileX + tiles[activeTile].rotations[tileRotation][1].x] = activeTile;
+    board[activeTileY + tiles[activeTile].rotations[tileRotation][2].y][activeTileX + tiles[activeTile].rotations[tileRotation][2].x] = activeTile;
+    board[activeTileY + tiles[activeTile].rotations[tileRotation][3].y][activeTileX + tiles[activeTile].rotations[tileRotation][3].x] = activeTile;
 
-    // If moving down is not possible, remove completed rows add score
-    // and find next tile and check if game is over
+    // If moving down is not possible, remove completed rows, add score
+    // find next tile and check if game is over
     if (!yAddIsValid) {
-
       for (let row = rows - 1; row >= 0; row--) {
         let isLineComplete = true
 
@@ -209,24 +198,24 @@ const App = () => {
 
       // Create new tile
       activeTile = randomizeTile()
-      activeTileX = columns / 2
+      activeTileX = Math.floor(columns / 2)
       activeTileY = 1
       tileRotation = 0
 
       // Test if game is over - test if new tile can't be placed in board
       if (
-        board[activeTileY + tiles[activeTile][tileRotation][0][1]][activeTileX + tiles[activeTile][tileRotation][0][0]] !== 0 ||
-        board[activeTileY + tiles[activeTile][tileRotation][1][1]][activeTileX + tiles[activeTile][tileRotation][1][0]] !== 0 ||
-        board[activeTileY + tiles[activeTile][tileRotation][2][1]][activeTileX + tiles[activeTile][tileRotation][2][0]] !== 0 ||
-        board[activeTileY + tiles[activeTile][tileRotation][3][1]][activeTileX + tiles[activeTile][tileRotation][3][0]] !== 0
+        board[activeTileY + tiles[activeTile].rotations[tileRotation][0].y][activeTileX + tiles[activeTile].rotations[tileRotation][0].x] !== 0 ||
+        board[activeTileY + tiles[activeTile].rotations[tileRotation][1].y][activeTileX + tiles[activeTile].rotations[tileRotation][1].x] !== 0 ||
+        board[activeTileY + tiles[activeTile].rotations[tileRotation][2].y][activeTileX + tiles[activeTile].rotations[tileRotation][2].x] !== 0 ||
+        board[activeTileY + tiles[activeTile].rotations[tileRotation][3].y][activeTileX + tiles[activeTile].rotations[tileRotation][3].x] !== 0
       ) {
         // Stop the game
       } else {
         // Otherwise, render new tile and continue
-        board[activeTileY + tiles[activeTile][tileRotation][0][1]][activeTileX + tiles[activeTile][tileRotation][0][0]] = activeTile
-        board[activeTileY + tiles[activeTile][tileRotation][1][1]][activeTileX + tiles[activeTile][tileRotation][1][0]] = activeTile
-        board[activeTileY + tiles[activeTile][tileRotation][2][1]][activeTileX + tiles[activeTile][tileRotation][2][0]] = activeTile
-        board[activeTileY + tiles[activeTile][tileRotation][3][1]][activeTileX + tiles[activeTile][tileRotation][3][0]] = activeTile
+        board[activeTileY + tiles[activeTile].rotations[tileRotation][0].y][activeTileX + tiles[activeTile].rotations[tileRotation][0].x] = activeTile
+        board[activeTileY + tiles[activeTile].rotations[tileRotation][1].y][activeTileX + tiles[activeTile].rotations[tileRotation][1].x] = activeTile
+        board[activeTileY + tiles[activeTile].rotations[tileRotation][2].y][activeTileX + tiles[activeTile].rotations[tileRotation][2].x] = activeTile
+        board[activeTileY + tiles[activeTile].rotations[tileRotation][3].y][activeTileX + tiles[activeTile].rotations[tileRotation][3].x] = activeTile
       }
     }
 
